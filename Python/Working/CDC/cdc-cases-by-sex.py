@@ -65,7 +65,7 @@ htmlCode=BeautifulSoup(driver.page_source,'html.parser')
 
 #download_button1=driver.find_elements_by_xpath('//span[@class="Download"]')[4]
 #download_button1.click()
-#time.sleep(5)
+time.sleep(20)
 
 
 
