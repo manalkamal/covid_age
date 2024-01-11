@@ -25,6 +25,9 @@ ss_db    <- rubric_i %>% dplyr::pull(Source)
 db_drive <- read_rds(paste0(dir_n, ctr, ".rds"))
 # -------------------------------------
 
+## MK 11.01.2024: https://data.cdc.gov/NCHS/Provisional-COVID-19-death-counts-and-rates-by-mon/yrur-wghw/about_data
+## Data are not available by State anymore, rather by 10 regions that have all states. so deprecated. 
+
 # info by age for each state!!
 url <- "https://data.cdc.gov/api/views/9bhg-hcku/rows.csv?accessType=DOWNLOAD"
 data_source <- paste0(dir_n, "Data_sources/", ctr, "/deaths_",today(), ".csv")
@@ -279,7 +282,7 @@ unique(out$Date)
 #              sheet = "database")
 
 write_rds(out, paste0(dir_n, ctr, ".rds"))
-log_update(pp = ctr, N = nrow(out))
+#log_update(pp = ctr, N = nrow(out))
 
 ############################################
 #### uploading metadata to Google Drive ####

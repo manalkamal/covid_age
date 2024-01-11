@@ -16,6 +16,8 @@ dir_n        <- "N:/COVerAGE-DB/Automation/Hydra/"
 drive_auth(email = Sys.getenv("email"))
 gs4_auth(email = Sys.getenv("email"))
 
+## Source: https://coronavirus.data.gov.uk/
+
 ###deaths total country
 
 deaths_url <- "https://api.coronavirus.data.gov.uk/v2/data?areaType=nation&areaCode=E92000001&metric=newDeaths28DaysByDeathDateAgeDemographics&format=csv"
@@ -286,7 +288,7 @@ out <- rbind(Deaths, Cases, Regional_Cases, Regional_Deaths) %>%
 write_rds(out, paste0(dir_n, ctr, ".rds"))
 
 # updating hydra dashboard
-log_update(pp = ctr, N = nrow(out))
+#log_update(pp = ctr, N = nrow(out))
 
 
 

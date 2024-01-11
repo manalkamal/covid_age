@@ -29,7 +29,7 @@ gs4_auth(email = Sys.getenv("email"))
 it <- read_rds(paste0(dir_n, ctr, ".rds"))
 
 it <- it %>% 
-  filter(Measure == "Cases" | Measure == "Deaths")
+  filter(Measure == "Cases" | Measure == "Deaths") 
   
 last_date_n <- it %>%
   mutate(date_f = dmy(Date)) %>%
@@ -61,11 +61,10 @@ if (date_f > last_date_n){
            Age = recode(Age,
                         "0-" = "0",
                         ">9" = "90",
-                        "No" = "UNK"),
-           Cases = recode(Cases,
-                          "<5" = "2"),
-           Deaths = recode(Deaths,
-                          "<5" = "2")) %>% 
+                        "No" = "UNK")
+           # Cases = recode(Cases, "<5" = "2"),
+           # Deaths = recode(Deaths, "<5" = "2")
+           ) %>% 
     gather(Cases, Deaths, key = Measure, value = Value) %>% 
     mutate(Value = as.integer(Value)) %>% 
     select(-iss_date)
@@ -116,10 +115,7 @@ if (date_f > last_date_n){
 
 ## Source Website: https://github.com/italia/covid19-opendata-vaccini/
 
-vacc <- read_csv("https://raw.githubusercontent.com/italia/covid19-opendata-vaccini/master/dati/somministrazioni-vaccini-latest.csv")
-# write_rds(vacc, "")
-
-vacc2 <- vacc %>% 
+vacc1 <- read_csv("https://raw.githubusercontent.com/italia/covid19-opendata-vaccini/master/dati/somministrazioni-vaccini-latest.csv") |> 
   rename(Date = data,
          Age = eta, 
          Vaccination1 = d1,
@@ -128,10 +124,25 @@ vacc2 <- vacc %>%
          Vaccination4 = db2,
          Vaccination5 = db3) %>% 
   select(Date, Age, Vaccination1, Vaccination2, 
-         Vaccination3, Vaccination4, Vaccination5) %>% 
+         Vaccination3, Vaccination4, Vaccination5) |> 
   gather(Vaccination1, Vaccination2, Vaccination3, 
          Vaccination4, Vaccination5, 
-         key = "Measure", value = new) %>% 
+         key = "Measure", value = new)
+
+## In 25.09.2023, a 'obligated' vaccination campaign was initiated, and younger ages had administered the vaccine, in response to Omicron
+## This is specific to Omicron a booster dose, so I will neglect and deprecate the Vaccination at 16.11.2023
+## https://www.salute.gov.it/portale/nuovocoronavirus/dettaglioContenutiNuovoCoronavirus.jsp?lingua=italiano&id=6110&area=nuovoCoronavirus&menu=vuoto
+# vacc2 <- read_csv("https://raw.githubusercontent.com/italia/covid19-opendata-vaccini/master/dati/somministrazioni-vaccini-latest-campagna-2023-2024.csv") |> 
+#   rename(Date = data,
+#          Age = eta, 
+#          males = m,
+#          females = f,
+#          Doses_number = d) |> 
+#   select(Date, Age, males, females, Measure) |> 
+#   mutate(new = males + females)
+  
+  
+vacc2 <- vacc1 %>% 
   mutate(Age = as.integer(str_sub(Age, 1, 2))) %>% 
   group_by(Date, Measure, Age) %>% 
   summarise(new = sum(new)) %>% 

@@ -115,7 +115,7 @@ out <-
 
 write_rds(out, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = ctr, N = nrow(out)) 
+#log_update(pp = ctr, N = nrow(out)) 
 
 #archive input data 
 

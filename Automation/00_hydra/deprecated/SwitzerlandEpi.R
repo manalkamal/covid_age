@@ -153,7 +153,7 @@ out <- bind_rows(processed_cases_age,
 
 write_rds(out, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = ctr, N = nrow(out)) 
+#log_update(pp = ctr, N = nrow(out)) 
 
 
 ## we have the zip file downloaded, so we just remove the unzipped folder 

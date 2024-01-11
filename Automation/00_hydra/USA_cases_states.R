@@ -25,7 +25,7 @@ dir_temp <- "N:/COVerAGE-DB/CDC-MonthlyData/"
 
 # folder name, this changes 
 
-folder <- "covid_case_restricted_detailed-master_02_11_2023" ## to change every update/ download of the data
+folder <- "covid_case_restricted_detailed-master_04_01_2024" ## to change every update/ download of the data
 
 # Read in files names 
 
@@ -46,7 +46,7 @@ read_file <- function(file_name){
                select = c("cdc_case_earliest_dt", "sex", "age_group", "res_state"))
 }
 
-## After reading, validate the number of rows as per mentioneD in GitHub repo
+## After reading, check the number of rows as per mentioned in GitHub repo
   
 raw_data <- files_list |> 
   map_dfr(read_par)

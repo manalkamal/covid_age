@@ -25,7 +25,6 @@ input_enc <- fix_enc(input)
 
 out05_enc_rd <- 
   out05_enc %>%
-  select(-id) |> 
   select(Country, Region, Code, Date, Sex, Age, AgeInt, 
          Cases, Deaths, Tests, Vaccination1,
          Vaccination2, Vaccination3, Vaccination4, Vaccination5, Vaccination6, 

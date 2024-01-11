@@ -81,10 +81,9 @@ tasks <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 scripts <- c('Austria', 
              'Bulgaria', 'Belgium', 'CanadaPDFs',
-             'Czechia', 'Colombia', 'Croatia', 
-             'CA_Ontario',  
-             'Estonia', 'England', 
-             'Estonia_vaccine', 'ECDC_vaccine', 'England_Vaccine', 
+             'Czechia', 'Colombia', 'CA_Ontario',  
+             'Estonia', 'Estonia_vaccine', 
+             'ECDC_vaccine', 'England_Vaccine', 
              'Finland', 'Finland_vaccine', 
              'Germany', 'Germany_vaccine', 'Guatemala',
              'Hong_Kong_Vaccine',
@@ -94,9 +93,7 @@ scripts <- c('Austria',
              'Norway_Vaccine',  
              'Scotland',   
              'SouthKorea', 
-             'SwitzerlandEpi', 
              'USA_cases_all', 
-             'USA_deaths_states',
              'Lithuania_vaccine')
 
 # scripts <- c('USA_cases_all', 'USA_cases_states', 'USA_deaths_all', 'USA_deaths_states')

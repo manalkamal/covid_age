@@ -50,18 +50,21 @@ Vaccine_in <- read.csv(data_source)
 Vaccine_out_reg <- Vaccine_in %>%
   mutate(Number= nchar(LandkreisId_Impfort)) %>% 
   mutate(RegID = case_when(
-    Number == "4" ~ substr(LandkreisId_Impfort,1,1),
-    TRUE ~ substr(LandkreisId_Impfort,1,2))) %>%
+    Number == "4" ~ substr(LandkreisId_Impfort, 1, 1),
+    Number == "5" ~ substr(LandkreisId_Impfort, 1, 2),
+    TRUE ~ substr(LandkreisId_Impfort, 1, 1))) %>%
+  filter(RegID != "17",
+         RegID != "u") %>%
   mutate(Region= recode(RegID,
-                        # "01"="Schleswig-Holstein",
-                        # "02"="Hamburg",
-                        # "03"="Niedersachsen",
-                        # "04"="Bremen",
-                        # "05"="Nordrhein-Westfalen",
-                        # "06"="Hessen",
-                        # "07"="Rheinland-Pfalz",
-                        # "08"="Baden-Württemberg",
-                        # "09"="Bayern",
+                        "01"="Schleswig-Holstein",
+                        "02"="Hamburg",
+                        "03"="Niedersachsen",
+                        "04"="Bremen",
+                        "05"="Nordrhein-Westfalen",
+                        "06"="Hessen",
+                        "07"="Rheinland-Pfalz",
+                        "08"="Baden-Württemberg",
+                        "09"="Bayern",
                         "1"="Schleswig-Holstein",
                         "2"="Hamburg",
                         "3"="Niedersachsen",
@@ -77,9 +80,7 @@ Vaccine_out_reg <- Vaccine_in %>%
                         "13"="Mecklenburg-Vorpommern",
                         "14"="Sachsen",
                         "15"="Sachsen-Anhalt",
-                        "16"="Thüringen"))%>%
-  filter(Region!= "17",
-         Region != "u")%>%
+                        "16"="Thüringen")) %>%
   select(Date=Impfdatum, Age= Altersgruppe, Measure= Impfschutz, Value=Anzahl, Region)%>%
   #sum subregional level to regional level
   group_by(Date, Age, Region, Measure)%>%
@@ -194,14 +195,14 @@ Vaccine_out <- rbind(Vaccine_out_all,Vaccine_out_reg) %>%
 # comparison with aggregate data reported online in 
 # https://impfdashboard.de/en/
 
-Vaccine_out |> 
-  mutate(Date = dmy(Date)) |> 
-  group_by() |> 
-  filter(Date == max(Date)) |> 
-  group_by(Region, Measure) |> 
-  summarize(N = sum(Value)) |> 
-  select(Region, Measure, N) |> 
-  pivot_wider(names_from = Measure, values_from = N) 
+# Vaccine_out |> 
+#   mutate(Date = dmy(Date)) |> 
+#   group_by() |> 
+#   filter(Date == max(Date)) |> 
+#   group_by(Region, Measure) |> 
+#   summarize(N = sum(Value)) |> 
+#   select(Region, Measure, N) |> 
+#   pivot_wider(names_from = Measure, values_from = N) 
 
 
 
