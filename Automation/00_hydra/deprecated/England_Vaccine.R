@@ -60,6 +60,10 @@ prepare_output <- function(df){
 #Website <- https://coronavirus.data.gov.uk/details/vaccinations?areaType=nation&areaName=England
 #api-page <- https://coronavirus.data.gov.uk/details/download
 
+## Website update: https://ukhsa-dashboard.data.gov.uk/topics/covid-19#vaccinations
+## 12.01.2024 MK: England is publishing only autumn boosters for 65+ 
+## so deprecated. 
+
 ## National-level England
 
 raw_data_national <- read.csv("https://api.coronavirus.data.gov.uk/v2/data?areaType=nation&areaCode=E92000001&metric=vaccinationsAgeDemographics&format=csv")
@@ -126,7 +130,7 @@ vacc_out <- bind_rows(vacc_out_national, vacc_out_regional)
 
 write_rds(vacc_out, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = "England_Vaccine", N = nrow(vacc_out))
+#log_update(pp = "England_Vaccine", N = nrow(vacc_out))
 
 
 ## Keep copy of raw data ## 

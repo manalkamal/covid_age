@@ -259,7 +259,8 @@ all_the_tables <- html %>%
   
   
   # tests by age and sex
-  test_url <- "https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/testing-covid-19"
+ # test_url <- "https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/testing-covid-19"
+  test_url <- "https://www.tewhatuora.govt.nz/our-health-system/data-and-statistics/covid-19-data/testing-for-covid-19/"
   
   html <-read_html(test_url)
   

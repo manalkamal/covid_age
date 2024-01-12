@@ -2,6 +2,7 @@ library(here)
 source(here("Automation/00_Functions_automation.R"))
 library(lubridate)
 library(ISOweek)
+library(aweek)
 
 
 # assigning Drive credentials in the case the script is verified manually  
@@ -55,13 +56,18 @@ In_processed <- In %>%
   pivot_longer(!YearWeekISO & !Code & !TargetGroup, names_to= "Measure", values_to= "Value")%>%
   #data was given separate by vaccine brand, sum those together 
   group_by(YearWeekISO, Code,TargetGroup, Measure) %>% 
-  mutate(Value = sum(Value)) %>% 
+  mutate(Value = sum(Value),
+         YearWeekISO = case_when(YearWeekISO == "2023-09" ~ "2023-W09",
+                                 YearWeekISO == "2023-10" ~ "2023-W10",
+                                 YearWeekISO == "2023-11" ~ "2023-W11",
+                                 YearWeekISO == "2023-12" ~ "2023-W12",
+                                 TRUE ~ YearWeekISO)) %>% 
   ungroup()%>% 
   distinct()%>% 
-  mutate(Day= "5")%>%
-  unite('ISODate', YearWeekISO, Day, sep="-", remove=FALSE)%>%
-  mutate(Date= ISOweek::ISOweek2date(ISODate),
-         Age= recode(TargetGroup, 
+  mutate(YearWeekDay = paste(YearWeekISO, 5, sep = "-"),
+        # Date = week2date(YearWeekDay),
+         Date = ISOweek::ISOweek2date(YearWeekDay),
+         Age = recode(TargetGroup, 
                      `ALL`= "TOT",
                      `Age0_4`= "0",
                      `Age5_9`= "5",

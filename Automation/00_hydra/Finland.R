@@ -86,41 +86,40 @@ sex_dist <-
   select(-val)
 
 # censored value in young ages
-val_miss <- 
-  deaths2 %>% 
-  filter(Sex == "b") %>% 
-  mutate(Age = case_when(Age != "TOT" ~ "no_tot", 
-                         TRUE ~ Age)) %>% 
-  drop_na() %>% 
-  group_by(Age) %>% 
-  summarise(val = sum(val)) %>% 
-  spread(Age, val) %>% 
-  mutate(miss = TOT - no_tot) %>% 
-  dplyr::pull(miss)
-
-# ages to be dropped due to missing values
-age_drop <- 
-  deaths2 %>% 
-  filter(Sex == "b",
-         is.na(val),
-         Age != "0") %>% 
-  dplyr::pull(Age)
+# val_miss <- 
+#   deaths2 %>% 
+#   filter(Sex == "b") %>% 
+#   mutate(Age = case_when(Age != "TOT" ~ "no_tot", 
+#                          TRUE ~ Age)) %>% 
+#   drop_na() %>% 
+#   group_by(Age) %>% 
+#   summarise(val = sum(val)) %>% 
+#   spread(Age, val) %>% 
+#   mutate(miss = TOT - no_tot) %>% 
+#   dplyr::pull(miss)
+# 
+# # ages to be dropped due to missing values
+# age_drop <- 
+#   deaths2 %>% 
+#   filter(Sex == "b",
+#          is.na(val),
+#          Age != "0") %>% 
+#   dplyr::pull(Age)
 
 # dropping ages
 deaths3 <- 
   deaths2 %>% 
-  filter(Age != age_drop) %>% 
+  #filter(Age != age_drop) %>% 
   mutate(val = case_when(Sex == "b" & Age == "0" ~ val_miss, 
                          TRUE ~ val))
 
 
 deaths_out <- 
   deaths3 %>% 
-  filter(Age != age_drop) %>% 
+ # filter(Age != age_drop) %>% 
   left_join(sex_dist) %>% 
   left_join(deaths3 %>% 
-              filter(Sex == "b",
-                     Age != age_drop) %>% 
+              filter(Sex == "b") %>% 
               select(Age, val_tot = val)) %>% 
   mutate(val = case_when(is.na(val) ~ val_tot * prop, 
                          TRUE ~ val),
@@ -319,10 +318,4 @@ zipr(zipname,
 
 # clean up file chaff
 file.remove(data_source)
-
-
-
-
-
-
 

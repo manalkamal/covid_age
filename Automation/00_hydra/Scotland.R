@@ -31,7 +31,13 @@ ss_db <- ss_list %>% dplyr::pull(Source)
 ## Cases data ====================
 
 
-cases_url <- read_html('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/19646dce-d830-4ee0-a0a9-fcec79b5ac71') %>% 
+## before 12.10.2023; https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/19646dce-d830-4ee0-a0a9-fcec79b5ac71
+
+## Viral Respiratory Diseases: https://www.opendata.nhs.scot/dataset/viral-respiratory-diseases-including-influenza-and-covid-19-data-in-scotland
+
+## after 12.10.2023, https://www.opendata.nhs.scot/dataset/viral-respiratory-diseases-including-influenza-and-covid-19-data-in-scotland/resource/d0ad59a3-431d-4b56-86fc-a04a2247fbd0
+
+cases_url <- read_html('https://www.opendata.nhs.scot/dataset/viral-respiratory-diseases-including-influenza-and-covid-19-data-in-scotland/resource/d0ad59a3-431d-4b56-86fc-a04a2247fbd0') %>% 
   html_nodes('#content > div.row.wrapper.no-nav > section > div > p > a') %>% 
   html_attr('href')
 
@@ -41,11 +47,11 @@ sccases <- read_csv(cases_url)
 # Pipeline for *today's* data:
 sc <- 
   sccases %>% 
-  select(Date, 
+  select(Date = LatestDate, 
          Sex, 
          Age = AgeGroup, 
-         Cases = TotalPositive) %>% 
-  filter(Age != 'Total')%>%
+         Cases = CumulativeCases) %>% 
+  filter(!Age %in% c('Total', "60plus", "0 to 59")) %>%
   mutate(
     Date = ymd(Date),
     Age = recode(Age,
@@ -57,8 +63,12 @@ sc <-
                  '65 to 74' = "65",
                  '75 to 84' = "75",
                  '85plus' = "85"),
-    Sex = recode(Sex,'Female' = 'f',
-                 'Male' = 'm'),
+    Sex = case_when(Sex == 'Female' ~ 'f',
+                    Sex == 'Male' ~ 'm',
+                    Sex == "Unknown" ~ "UNK",
+                    Sex == "Total" ~ "b"),
+    Age = case_when(Age == "Unknown" ~ "UNK",
+                    TRUE ~ Age),
     AgeInt = case_when(
       Age == "0" ~ 15,
       Age == "15" ~ 5,
@@ -68,8 +78,6 @@ sc <-
       Age == "65" ~ 10,
       Age == "75" ~ 10,
       Age == "85" ~ 20)) %>% 
-  filter(Age != "60+") %>% 
-  filter(Age != "0 to 59") %>% 
   pivot_longer(Cases, 
                names_to = "Measure",
                values_to = "Value") %>% 
@@ -88,7 +96,7 @@ sc <-
 ## CASES Trend data ====================
 
 trend_url <-
-  read_html("https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/9393bd66-5012-4f01-9bc5-e7a10accacf4") %>% 
+  read_html("https://www.opendata.nhs.scot/dataset/viral-respiratory-diseases-including-influenza-and-covid-19-data-in-scotland/resource/3bedb666-48e7-46f0-92de-11a3c45c1ebb") %>% 
   html_nodes('#content > div.row.wrapper.no-nav > section > div > p > a') %>% 
   html_attr('href')
 
@@ -99,11 +107,11 @@ sctrend <- read_csv(trend_url)
 
 sct <-
   sctrend %>% 
-  select(Date, 
+  select(Date = WeekEnding, 
          Sex, 
          Age = AgeGroup, 
-         Value = CumulativePositive) %>%  
-  filter(!Age %in% c("0 to 59", "60+")) |> 
+         Value = CumulativeCases) %>%  
+  filter(!Age %in% c("60plus", "0 to 59")) %>% 
   mutate(
     Date = ymd(Date),
     Age = recode(Age,
@@ -118,7 +126,10 @@ sct <-
                  '85plus' = "85"),
     Sex = recode(Sex,'Female' = 'f',
                  'Male' = 'm',
-                 'Total' = 'b'),
+                 'Total' = 'b',
+                 "Unknown" = "UNK"),
+    Age = case_when(Sex == "UNK" ~ NA,
+                    TRUE ~ Age),
     AgeInt = case_when(
       Age == "TOT" ~ NA_real_,
       Age == "0" ~ 15,
@@ -130,9 +141,7 @@ sct <-
       Age == "75" ~ 10,
       Age == "85" ~ 20),
     Measure = "Cases") %>% 
-  # filter(Age != "60+") %>% 
-  # filter(Age != "0 to 59") %>% 
-  filter(Date >= ymd("2020-03-09")) %>% 
+  # filter(Date >= ymd("2020-03-09")) %>% 
   arrange(Date, Sex, Measure, Age) %>% 
   ungroup() %>%  
   mutate(Country = "Scotland",
@@ -142,77 +151,9 @@ sct <-
          Code = paste0('GB-SCT'))
 
 
-## CASES Totals data =======================
-
-totals_url <- read_html('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76') %>% 
-  html_nodes('#content > div.row.wrapper.no-nav > section > div > p > a') %>% 
-  html_attr('href')
-
-# Extract totals, which we hope are retrospectively corrected,
-# or at least will be one day? In that case, adjustment will
-# be automatic on our side.
-sctot   <- read_csv(totals_url)
-
-# Prepare CASES totals
-TOT <- 
-  sctot %>% 
-  mutate(Date = ymd(Date)) %>% 
-  select(Date,
-         Value = CumulativeCases) %>% 
-  ## MK: no need for total deaths again, we have it in the weekly data 
-     #    Deaths = Deaths) %>% 
-  mutate(Country = "Scotland",
-         Region = "All",
-         Sex = "b",
-         Metric = "Count",
-         AgeInt = NA_integer_,
-         Age = "TOT") %>% 
-  mutate(Date = ddmmyyyy(Date),
-         Measure = "Cases",
-         Code = paste0("GB-SCT")) %>% 
-  select(all_of(colnames(sc)))
-
-# -----------------------
 
 Date_cases  <- sc %>% dplyr::pull(Date) %>% unique() %>% dmy()
 Date_trends <- sct %>% dplyr::pull(Date) %>% dmy() %>% max()
-
-# Current input database
-###########################################adapt here, how data gets read in############new from rds
-SCin       <- 
-  read_rds(paste0(dir_n, ctr, ".rds")) %>% 
-  filter(Age != "All ages") %>% 
-  mutate(Code = "GB-SCT")
-
-
-# 1) remove Date_cases if present:
-
-SCin_keep <- SCin %>% 
-  filter(dmy(Date) < Date_cases)
-
-# 2) any dates in trends that aren't in SCin_keep at this time?
-
-drive_dates        <- 
-  SCin_keep %>% 
-  dplyr::pull(Date) %>% 
-  dmy() %>% unique() %>% 
-  sort()
-
-trend_dates        <- 
-  sct %>% 
-  dplyr::pull(Date) %>% 
-  dmy() %>% 
-  unique() %>% 
-  sort()
-
-trend_dates_include <- trend_dates[!trend_dates %in% c(drive_dates, Date_cases)]
-
-sct_out <-
-  sct %>% 
-  filter(dmy(Date) %in% trend_dates_include)
-
-
-### ------------------------------
 
 
 
@@ -228,7 +169,9 @@ sct_out <-
 # However, we use the trend data as always in the input_dataset
 # Note: Scotland.rds for data till 02.06.2022 is deprecated in the folder. 
 
-#Source: https://www.nrscotland.gov.uk/covid19stats
+# Source: https://www.nrscotland.gov.uk/covid19stats
+
+## Archive source: https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/deaths-involving-coronavirus-covid-19-in-scotland/archive
 
 ## Function to edit the table 
 
@@ -281,23 +224,30 @@ wk_data_2021 <- read_excel(deaths_source2021,
   edit_table()
 
 
-## 2022/ MOST RECENT FILE ## 
+## 2022 deaths
+
+deaths_source2022 <- paste0(dir_n, "Data_sources/", ctr, "/", ctr, "-deaths_2022", ".xlsx")
+
+deaths_2022 <- "https://www.nrscotland.gov.uk/files//statistics/covid19/covid-deaths-22-data-final.xlsx"
+
+## DOWNLOAD DEATHS recent file AND READ IN THE DATA ##
+
+download.file(url = deaths_2022,
+              destfile = deaths_source2022,
+              mode = "wb")
+
+
+wk_data_2022 <- read_excel(deaths_source2022, sheet = 4, skip = 5) %>% 
+  edit_table()
+
+
+## 2023 and 2024 datasets:
+
+## source link: https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-deaths-registered-in-scotland
 
 
 deaths_source <- paste0(dir_n, "Data_sources/", ctr, "/", ctr, "-deaths_",today(), ".xlsx")
 
-## This file is changed ##
-# recent_file_2022 <- read_html("https://www.nrscotland.gov.uk/covid19stats/") %>% 
-#   html_nodes(".rteright+ td > a") %>% 
-#   html_attr('href') %>% 
-#  # .[2] %>% 
-#   stringr::str_replace("/files//statistics/covid19/", "")
-# 
-# 
-# deaths_url <- paste0("https://www.nrscotland.gov.uk/files//statistics/covid19/",
-#                      recent_file_2022)
-
-## Source: https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-deaths-registered-in-scotland
 deathsfile_url <- read_html("https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/vital-events/general-publications/weekly-deaths-registered-in-scotland") %>% 
   html_nodes(".rteright+ td > a") %>% 
   html_attr('href')
@@ -316,10 +266,11 @@ deaths_recent <- read_excel(deaths_source, sheet = 4, skip = 5) %>%
   edit_table()
 
 
-## MERGE ALL DATASETS: 2020, 2021, 2022 (MOST RECENT)
+## MERGE ALL DATASETS: 2020, 2021, 2022, 2023 and 2024 (MOST RECENT)
 
 deaths <- bind_rows(wk_data_2020,
                     wk_data_2021,
+                    wk_data_2022,
                     deaths_recent)
 
 
@@ -372,6 +323,7 @@ deaths_out <- deaths_cleaned %>%
                 Measure = "Deaths") %>% 
   select(Country, Region, Code, Date, Sex, 
          Age, AgeInt, Metric, Measure, Value) %>% 
+  unique() |> 
   sort_input_data()
 
 ## save a copy of deaths_out data on daily basis ## 
@@ -383,25 +335,117 @@ write_rds(deaths_out,
 
 # -----------------------------
 # Compose what we want to keep:
-SCout <- 
-  SCin_keep %>% 
-  bind_rows(sct_out) %>% # fills gaps
-  bind_rows(TOT) %>% 
-  bind_rows(sc) %>% 
-  ## MK: bind weekly deaths (MALES, FEMALES & TOTALS) since the daily are not published/ updated
-  bind_rows(deaths_out)  %>% 
-# select(all_of(colnames(sc)))
-  sort_input_data() %>% 
-  group_by(Date,Sex,Measure) %>% 
-  mutate(N=n()) %>% 
-  ungroup() %>% 
-  filter(N > 1) %>% 
-  select(-N)
+# Current input database
+###########################################adapt here, how data gets read in############new from rds
+
+SCin <- read_rds(paste0(dir_n, ctr, ".rds")) 
+
+
+SCout <- bind_rows(sc,
+                   sct,
+                   deaths_out,
+                   SCin) |> 
+  unique() |> 
+  sort_input_data()
+
+write_rds(SCout, paste0(dir_n, ctr, ".rds"))
+
+log_update(pp = "Scotland", N = nrow(SCout))
+
+
+
+## Code Commented =============
+
+## CASES Totals data =======================
+
+# totals_url <- read_html('https://www.opendata.nhs.scot/dataset/b318bddf-a4dc-4262-971f-0ba329e09b87/resource/287fc645-4352-4477-9c8c-55bc054b7e76') %>% 
+#   html_nodes('#content > div.row.wrapper.no-nav > section > div > p > a') %>% 
+#   html_attr('href')
+# 
+# # Extract totals, which we hope are retrospectively corrected,
+# # or at least will be one day? In that case, adjustment will
+# # be automatic on our side.
+# sctot   <- read_csv(totals_url)
+# 
+# # Prepare CASES totals
+# TOT <- 
+#   sctot %>% 
+#   mutate(Date = ymd(Date)) %>% 
+#   select(Date,
+#          Value = CumulativeCases) %>% 
+#   ## MK: no need for total deaths again, we have it in the weekly data 
+#      #    Deaths = Deaths) %>% 
+#   mutate(Country = "Scotland",
+#          Region = "All",
+#          Sex = "b",
+#          Metric = "Count",
+#          AgeInt = NA_integer_,
+#          Age = "TOT") %>% 
+#   mutate(Date = ddmmyyyy(Date),
+#          Measure = "Cases",
+#          Code = paste0("GB-SCT")) %>% 
+#   select(all_of(colnames(sc)))
+
+# -----------------------
+
+## This file is changed ##
+# recent_file_2022 <- read_html("https://www.nrscotland.gov.uk/covid19stats/") %>% 
+#   html_nodes(".rteright+ td > a") %>% 
+#   html_attr('href') %>% 
+#  # .[2] %>% 
+#   stringr::str_replace("/files//statistics/covid19/", "")
+# 
+# 
+# deaths_url <- paste0("https://www.nrscotland.gov.uk/files//statistics/covid19/",
+#                      recent_file_2022)
+
+
+# # 1) remove Date_cases if present:
+# 
+# SCin_keep <- SCin %>% 
+#   filter(dmy(Date) < Date_cases)
+# 
+# # 2) any dates in trends that aren't in SCin_keep at this time?
+# 
+# drive_dates        <- 
+#   SCin_keep %>% 
+#   dplyr::pull(Date) %>% 
+#   dmy() %>% unique() %>% 
+#   sort()
+# 
+# trend_dates        <- 
+#   sct %>% 
+#   dplyr::pull(Date) %>% 
+#   dmy() %>% 
+#   unique() %>% 
+#   sort()
+# 
+# trend_dates_include <- trend_dates[!trend_dates %in% c(drive_dates, Date_cases)]
+# 
+# sct_out <-
+#   sct %>% 
+#   filter(dmy(Date) %in% trend_dates_include)
+
+
+# SCout <- 
+#   SCin_keep %>% 
+#   bind_rows(sct_out) %>% # fills gaps
+#   bind_rows(TOT) %>% 
+#   bind_rows(sc) %>% 
+#   ## MK: bind weekly deaths (MALES, FEMALES & TOTALS) since the daily are not published/ updated
+#   bind_rows(deaths_out)  %>% 
+# # select(all_of(colnames(sc)))
+#   sort_input_data() %>% 
+#   group_by(Date,Sex,Measure) %>% 
+#   mutate(N=n()) %>% 
+#   ungroup() %>% 
+#   filter(N > 1) %>% 
+#   select(-N)
   
-n <- duplicated(SCout[, c("Date", "Sex","Measure","Age")])
-SCout <- 
-  SCout %>% 
-  dplyr::filter(!n)
+# n <- duplicated(SCout[, c("Date", "Sex","Measure","Age")])
+# SCout <- 
+#   SCout %>% 
+#   dplyr::filter(!n)
 
 # -----------------------------
 ##############################new rds file
@@ -409,38 +453,33 @@ SCout <-
 #sheet_write(SCout,
 #            ss = ss_i,
 #            sheet = "database")
-write_rds(SCout, paste0(dir_n, ctr, ".rds"))
 
-N <- nrow(SCout)
-log_update(pp = "Scotland", N = N)
 #-----------------------------
 # upload source sheets to Drive as google sheets
 
-sheet_name <- paste0("Scotland_", Date_cases)
+# sheet_name <- paste0("Scotland_", Date_cases)
+# 
+# meta <- drive_create(sheet_name,
+#                      path = ss_db, 
+#                      type = "spreadsheet",
+#                      overwrite = TRUE)
+# 
+# write_sheet(sccases, 
+#             ss = meta$id,
+#             sheet = "today")
+# 
+# Sys.sleep(100)
+# write_sheet(sctrend, 
+#             ss = meta$id,
+#             sheet = "trend")
+# 
+# Sys.sleep(100)
+# write_sheet(sctot, 
+#             ss = meta$id,
+#             sheet = "totals")
+# sheet_delete(meta$id, "Sheet1")
 
-meta <- drive_create(sheet_name,
-                     path = ss_db, 
-                     type = "spreadsheet",
-                     overwrite = TRUE)
 
-write_sheet(sccases, 
-            ss = meta$id,
-            sheet = "today")
-
-Sys.sleep(100)
-write_sheet(sctrend, 
-            ss = meta$id,
-            sheet = "trend")
-
-Sys.sleep(100)
-write_sheet(sctot, 
-            ss = meta$id,
-            sheet = "totals")
-sheet_delete(meta$id, "Sheet1")
-
-
-
-## history =============
 # deaths2 <- deaths %>% 
 #   select(Date = DateCode, 
 #          Sex, 
