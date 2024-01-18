@@ -67,23 +67,23 @@ deaths2 <-
          Age = case_when(Age == "00" ~ "0",
                          Age == "Al" ~ "TOT",
                          TRUE ~ Age),
-         val = val %>% as.double()) %>% 
+         Value = as.integer(val)) %>% 
   select(-Gender)
 
-# sex distribution at young ages for imputation
-sex_dist <- 
-  deaths2 %>% 
-  filter(Sex != "b",
-         Age %in% c("30", "40")) %>% 
-  mutate(val = case_when(is.na(val) ~ 0, 
-                         TRUE ~ val),
-         val = val %>% as.double()) %>% 
-  group_by(Sex) %>% 
-  summarise(val = sum(val)) %>% 
-  ungroup() %>% 
-  group_by() %>% 
-  mutate(prop = val/sum(val)) %>% 
-  select(-val)
+# # sex distribution at young ages for imputation
+# sex_dist <- 
+#   deaths2 %>% 
+#   filter(Sex != "b",
+#          Age %in% c("30", "40")) %>% 
+#   mutate(val = case_when(is.na(val) ~ 0, 
+#                          TRUE ~ val),
+#          val = val %>% as.double()) %>% 
+#   group_by(Sex) %>% 
+#   summarise(val = sum(val)) %>% 
+#   ungroup() %>% 
+#   group_by() %>% 
+#   mutate(prop = val/sum(val)) %>% 
+#   select(-val)
 
 # censored value in young ages
 # val_miss <- 
@@ -106,28 +106,27 @@ sex_dist <-
 #          Age != "0") %>% 
 #   dplyr::pull(Age)
 
-# dropping ages
-deaths3 <- 
-  deaths2 %>% 
-  #filter(Age != age_drop) %>% 
-  mutate(val = case_when(Sex == "b" & Age == "0" ~ val_miss, 
-                         TRUE ~ val))
+# # dropping ages
+# deaths3 <- 
+#   deaths2 %>% 
+#   #filter(Age != age_drop) %>% 
+#   mutate(val = case_when(Sex == "b" & Age == "0" ~ val_miss, 
+#                          TRUE ~ val))
 
 
 deaths_out <- 
-  deaths3 %>% 
+  deaths2 %>% 
  # filter(Age != age_drop) %>% 
-  left_join(sex_dist) %>% 
-  left_join(deaths3 %>% 
-              filter(Sex == "b") %>% 
-              select(Age, val_tot = val)) %>% 
-  mutate(val = case_when(is.na(val) ~ val_tot * prop, 
-                         TRUE ~ val),
-         val = round(val)) %>% 
-  select(-val_tot, -prop, Value = val) %>% 
+  # left_join(sex_dist) %>% 
+  # left_join(deaths3 %>% 
+  #             filter(Sex == "b") %>% 
+  #             select(Age, val_tot = val)) %>% 
+  # mutate(val = case_when(is.na(val) ~ val_tot * prop, 
+  #                        TRUE ~ val),
+  #        val = round(val)) %>% 
+  # select(-val_tot, -prop, Value = val) %>% 
   mutate(Measure = "Deaths",
-         AgeInt = case_when(Age == "0" ~ as.numeric(lead(Age)) - as.numeric(Age),
-                            Age == "80" ~ 25,
+         AgeInt = case_when(Age == "80" ~ 25,
                             Age == "TOT" ~ NA_real_,
                             TRUE ~ 10),
          Country = "Finland",
@@ -250,10 +249,10 @@ FI_out <-
   bind_rows(Cases,
             deaths_out) %>% 
   # remove duplicates, select larger value
-  group_by(Region, Measure, Metric, Sex, Age, Date) %>% 
-  mutate(isMax = Value == max(Value)) %>% 
-  ungroup() %>% 
-  dplyr::filter(isMax) %>% 
+  # group_by(Region, Measure, Metric, Sex, Age, Date) %>% 
+  # mutate(isMax = Value == max(Value)) %>% 
+  # ungroup() %>% 
+  # dplyr::filter(isMax) %>% 
   unique() %>% 
   sort_input_data() 
 
