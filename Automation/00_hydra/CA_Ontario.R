@@ -31,19 +31,19 @@ url_test <- "https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e
 #-------saving input files locally and to Drive
 
 #download.file(url, destfile = data_source_c)
-df_epi <- data.table::fread(url)
-
-download.file(url_test, destfile = data_source_t)
-# loading data
-#df <- data.table::fread(data_source_c)
-df_test <- read.csv(data_source_t)
+# df_epi <- data.table::fread(url)
+# 
+# download.file(url_test, destfile = data_source_t)
+# # loading data
+# #df <- data.table::fread(data_source_c)
+# df_test <- read.csv(data_source_t)
 
 ## manual download and read ============
 
-# df_epi <- read_csv("C:/Users/elzalabany/Downloads/conposcovidloc.csv")
+df_epi <- read_csv("C:/Users/elzalabany/Downloads/conposcovidloc.csv")
 write_csv(df_epi, data_source_c)
 # 
-# df_test <- read_csv("C:/Users/elzalabany/Downloads/covidtesting.csv")
+df_test <- read_csv("C:/Users/elzalabany/Downloads/covidtesting.csv")
 write_csv(df_test, data_source_t)
 
 #-------there are often date problems...checking...first case should be Jan 21, 2020
