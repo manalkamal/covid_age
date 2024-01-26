@@ -19,6 +19,7 @@ dir_n <- "N:/COVerAGE-DB/Automation/Hydra/"
 drive_auth(email = Sys.getenv("email"))
 gs4_auth(email = Sys.getenv("email"))
 
+## MK 26.01.2024: THE DATASET IS ARCVHIVED AS PER THE WEBSITE. 
 
 ## SourceWebsite <- "https://www.ecdc.europa.eu/en/publications-data/data-covid-19-vaccination-eu-eea"
 
@@ -142,7 +143,7 @@ Out <- In_processed %>%
 
 #save output data 
 write_rds(Out, paste0(dir_n, ctr, ".rds"))
-log_update(pp = ctr, N = nrow(Out))
+#log_update(pp = ctr, N = nrow(Out))
 
 #zip input data
 
