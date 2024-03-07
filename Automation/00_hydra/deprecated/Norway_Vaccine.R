@@ -74,6 +74,8 @@ library(xml2)
 
 ## THESE DATA ARE CUMLATIVE ## 
 
+## MK 07.03.2024, Deprecated, the page is not available anymore. 
+
 api <- "https://statistikk.fhi.no/api/sysvak/v0/vaccinations?columns=diagnose&rows=alder&diagnosisList=COVID_19&sexesList=K,M&dosesList=01,02,03,04"
 
 data_today <- jsonlite::fromJSON(api)[['groupings']] %>%
@@ -146,7 +148,7 @@ vacc_out <- rbind(vacc_today, vacc_historical) %>%
 write_rds(vacc_out, paste0(dir_n, ctr, ".rds"))
 
 
-log_update("Norway_Vaccine", N = nrow(vacc_out))
+# log_update("Norway_Vaccine", N = nrow(vacc_out))
 
 
 ## Keep a copy of today's data 

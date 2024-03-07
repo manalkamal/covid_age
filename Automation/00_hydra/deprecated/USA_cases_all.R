@@ -1,5 +1,8 @@
 #USA cases and deaths
 
+## MK: 07.03.2024: This script is deprecated as the Total cases are not published anymore, 
+## and deaths are published in different age structure than the one we have. 
+
 source("https://raw.githubusercontent.com/timriffe/covid_age/master/Automation/00_Functions_automation.R")
 # assigning Drive credentials in the case the script is verified manually  
 if (!"email" %in% ls()){
@@ -121,6 +124,49 @@ case_sex_out= cases_sex_in%>%
   select(Country, Region, Code, Date, Sex,
          Age, AgeInt, Metric, Measure, Value)
 
+#put togehter 
+
+out= rbind(DataArchive, case_age_out, case_sex_out)%>%
+  unique() %>% 
+  sort_input_data()
+
+
+#save 
+write_rds(out, paste0(dir_n, ctr, ".rds"))
+
+
+#archive input data 
+
+data_source1 <- paste0(dir_n, "Data_sources/", ctr, "/cases_age_",today(), ".csv")
+data_source3 <- paste0(dir_n, "Data_sources/", ctr, "/cases_sex_",today(), ".csv")
+
+
+write_csv(cases_age_in, data_source1)
+write_csv(cases_sex_in, data_source3)
+
+
+data_source <- c(data_source1, data_source3)
+
+
+zipname <- paste0(dir_n, 
+                  "Data_sources/", 
+                  ctr,
+                  "/", 
+                  ctr,
+                  "_data_",
+                  today(), 
+                  ".zip")
+
+zip::zipr(zipname, 
+          data_source, 
+          recurse = TRUE, 
+          compression_level = 9,
+          include_directories = TRUE)
+
+file.remove(data_source)
+
+# log_update(pp = ctr, N = nrow(out)) 
+
 
 #deaths by age 
 
@@ -221,48 +267,7 @@ case_sex_out= cases_sex_in%>%
 #          Age, AgeInt, Metric, Measure, Value)
 # 
 
-#put togehter 
 
-out= rbind(DataArchive, case_age_out, case_sex_out)%>%
-  unique() %>% 
-  sort_input_data()
-
-
-#save 
-write_rds(out, paste0(dir_n, ctr, ".rds"))
-
-
-#archive input data 
-
-data_source1 <- paste0(dir_n, "Data_sources/", ctr, "/cases_age_",today(), ".csv")
-data_source3 <- paste0(dir_n, "Data_sources/", ctr, "/cases_sex_",today(), ".csv")
-
-
-write_csv(cases_age_in, data_source1)
-write_csv(cases_sex_in, data_source3)
-
-
-data_source <- c(data_source1, data_source3)
-
-
-zipname <- paste0(dir_n, 
-                  "Data_sources/", 
-                  ctr,
-                  "/", 
-                  ctr,
-                  "_data_",
-                  today(), 
-                  ".zip")
-
-zip::zipr(zipname, 
-          data_source, 
-          recurse = TRUE, 
-          compression_level = 9,
-          include_directories = TRUE)
-
-file.remove(data_source)
-
-log_update(pp = ctr, N = nrow(out)) 
 
 
 
