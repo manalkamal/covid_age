@@ -24,6 +24,8 @@ data_source <- paste0(dir_n, "Data_sources/", ctr, "/ExcelReferenceData/cases_",
 #korea_url <- "http://ncov.mohw.go.kr/"
 #korea_url <- "http://ncov.kdca.go.kr/"
 
+## MK 13.03.2024: No cases data since 31.08.2023, and no further deaths data since 06.03.2024. 
+
 korea_url <- "https://ncov.kdca.go.kr/bdBoardListR.do?brdId=1&brdGubun=11"
 
 url_scrape <- read_html(korea_url) %>% 
@@ -331,7 +333,7 @@ db_out <- current_combos |>
 
 write_rds(db_out,  paste0(dir_n, ctr, ".rds"))
 
-log_update("SouthKorea", N = nrow(new_data))
+#log_update("SouthKorea", N = nrow(new_data))
 
 #archive input data 
 
