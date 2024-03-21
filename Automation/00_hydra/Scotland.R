@@ -114,23 +114,22 @@ sct <-
   filter(!Age %in% c("60plus", "0 to 59")) %>% 
   mutate(
     Date = ymd(Date),
-    Age = recode(Age,
-                 'Total' = "TOT",
-                 '0 to 14' = "0",
-                 '15 to 19' = "15",
-                 '20 to 24' = "20",
-                 '25 to 44' = "25",
-                 '45 to 64' = "45",
-                 '65 to 74' = "65",
-                 '75 to 84' = "75",
-                 '85plus' = "85"),
+    Age = case_when(Age == 'Total' ~ "TOT",
+                    Age == "Unknown" ~ "UNK",
+                    Age == '0 to 14' ~ "0",
+                    Age == '15 to 19' ~ "15",
+                    Age == '20 to 24' ~ "20",
+                    Age == '25 to 44' ~ "25",
+                    Age == '45 to 64' ~ "45",
+                    Age == '65 to 74' ~ "65",
+                    Age == '75 to 84' ~ "75",
+                    Age == '85plus' ~ "85"),
     Sex = recode(Sex,'Female' = 'f',
                  'Male' = 'm',
                  'Total' = 'b',
                  "Unknown" = "UNK"),
-    Age = case_when(Sex == "UNK" ~ NA,
-                    TRUE ~ Age),
     AgeInt = case_when(
+      Age == "UNK" ~ NA_real_,
       Age == "TOT" ~ NA_real_,
       Age == "0" ~ 15,
       Age == "15" ~ 5,
@@ -271,7 +270,7 @@ deaths_recent <- read_excel(deaths_source, sheet = 4, skip = 5) %>%
 deaths <- bind_rows(wk_data_2020,
                     wk_data_2021,
                     wk_data_2022,
-                    deaths_recent)
+                    deaths_recent) 
 
 
 
@@ -287,6 +286,7 @@ deaths_cleaned <- deaths %>%
   dplyr::mutate(date_prep = as.Date(as.numeric(date_prep), origin = "1899-12-30")) %>% 
   dplyr::group_by(Sex) %>% 
   dplyr::arrange(date_prep) %>% 
+  dplyr::filter(!is.na(`1-14`)) |> 
   ## CONVERT THE NEWLY WEEKLY TO CUMULATIVE WEEKLY
   dplyr::mutate(across(.cols = -c("date_prep"), ~ cumsum(.x))) %>% 
   tidyr::pivot_longer(cols = -c("date_prep", "Sex"),
@@ -338,7 +338,8 @@ write_rds(deaths_out,
 # Current input database
 ###########################################adapt here, how data gets read in############new from rds
 
-SCin <- read_rds(paste0(dir_n, ctr, ".rds")) 
+SCin <- read_rds(paste0(dir_n, ctr, ".rds")) |> 
+  filter(Measure == "Tests")
 
 
 SCout <- bind_rows(sc,
