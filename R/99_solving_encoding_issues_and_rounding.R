@@ -46,8 +46,12 @@ out10_enc_rd <-
 input_enc_rd <- 
   input_enc %>% 
   mutate(Value = round(Value, 1)) %>% 
-  select(-templateID) |> 
-  pivot_wider(names_from = Measure, values_from = Value) |> 
+  group_by(Country, Code, Region, Sex, Date, Age, AgeInt, Measure) %>%
+  mutate(row_no = row_number()) %>%
+  pivot_wider(names_from = Measure, values_from = Value) %>% 
+  select(-row_no) |> 
+  ungroup() |> 
+ # select(-templateID) |> 
   select(Country, Region, Code, Date, Sex, Age, AgeInt, 
          Cases, Deaths, Tests, Vaccination1,
          Vaccination2, Vaccination3, Vaccination4, Vaccination5, Vaccination6, 

@@ -426,6 +426,7 @@ cz_spreadsheet_all <-
 
 out <- bind_rows(cz_spreadsheet_all, cz_spreadsheet_region) %>% 
   dplyr::filter(Region != "UNK") %>% 
+  unique() |> 
   sort_input_data()
 
 
