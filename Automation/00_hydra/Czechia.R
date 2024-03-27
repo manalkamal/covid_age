@@ -422,7 +422,9 @@ cz_spreadsheet_all <-
          Measure, 
          Value) %>% 
   arrange(dmy(Date), Sex, Measure, Age) %>% 
-  mutate(Age = as.character(Age))
+  mutate(Age = as.character(Age)) |> 
+  unique() |> 
+  sort_input_data()
 
 out <- bind_rows(cz_spreadsheet_all, cz_spreadsheet_region) %>% 
   dplyr::filter(Region != "UNK") %>% 
