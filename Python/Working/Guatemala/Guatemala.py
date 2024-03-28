@@ -24,7 +24,7 @@ from webdriver_manager.core.driver_cache import DriverCacheManager
 warnings.filterwarnings("ignore")
 timestr = time.strftime("%Y%m%d")
 
-src = r"C:\Users\Krishnan\Downloads\\"
+src = r"C:\Users\elzalabany\Downloads\\"
 dst = r"N:\COVerAGE-DB\Automation\Guatemala\\"
 
 base_url = 'https://tableros.mspas.gob.gt/covid/'
