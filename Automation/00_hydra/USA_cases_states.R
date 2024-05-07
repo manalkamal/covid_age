@@ -25,7 +25,7 @@ dir_temp <- "N:/COVerAGE-DB/CDC-MonthlyData/"
 
 # folder name, this changes 
 
-folder <- "covid_case_restricted_detailed-master_07_03_2024" ## to change every update/ download of the data
+folder <- "covid_case_restricted_detailed-master_02_05_2024" ## to change every update/ download of the data
 
 # Read in files names 
 
