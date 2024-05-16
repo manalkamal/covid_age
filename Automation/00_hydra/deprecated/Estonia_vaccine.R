@@ -140,7 +140,7 @@ Out_vaccine <- Out_vaccine %>%
 
 write_rds(Out_vaccine, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = ctr, N = nrow(Out_vaccine))
+#log_update(pp = ctr, N = nrow(Out_vaccine))
 
 
 # ------------------------------------------

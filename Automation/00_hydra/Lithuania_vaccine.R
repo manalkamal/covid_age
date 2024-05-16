@@ -28,9 +28,10 @@ gs4_auth(email = Sys.getenv("email"))
 
 In= data.table::fread("https://opendata.arcgis.com/api/v3/datasets/ffb0a5bfa58847f79bf2bc544980f4b6_0/downloads/data?format=csv&spatialRefId=4326")
 
+## reading the file after manual download to Downloads folder 
+#In= data.table::fread("C:/Users/elzalabany/Downloads/COVID19_vakcinavimas_2093035353382923497.csv")
 
 ## MK 08.08.2022
-
 ## Well, it seems that at some point the authorities added 'dose_number'
 ## so I adapted the code accordingly
 
@@ -58,7 +59,7 @@ processed_data <- In %>%
   separate(Date, c("Date", "Time"), " ") %>% 
   # as per the codebook: V-vyras, M-moteris:
   # V for males, M for females 
-  mutate(Date = ymd(Date),
+  mutate(Date = mdy(Date),
          Sex = recode(Sex, 
                      `M`= "f",
                      `V`= "m"),
