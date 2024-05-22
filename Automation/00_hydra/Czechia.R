@@ -234,29 +234,36 @@ cz_vaccines <-
          Age = vekova_skupina,
          code = kraj_nuts_kod,
          first_dose = prvnich_davek,
-         second_dose = druhych_davek,
-         n_dose = celkem_davek ) %>% 
+         second_dose = druhych_davek
+         #n_dose = celkem_davek 
+         ) %>% 
   left_join(CZNUTS3, by = "code") %>% 
-  select(Date, Age, Code, first_dose, second_dose, n_dose) %>% 
+  select(Date, Age, Code, first_dose, second_dose
+         #,n_dose
+         ) %>% 
   group_by(Date, Age, Code) %>% 
   summarize(first_dose = sum(first_dose),
             second_dose = sum(second_dose),
-            n_dose = sum(n_dose),
+          #  n_dose = sum(n_dose),
             .groups = "drop") %>% 
   tidyr::complete(Code = CZNUTS3$Code, 
                   Date = Dates_AllV, 
                   Age = all_ages_V, 
                   fill = list(first_dose = 0, 
-                              second_dose = 0, 
-                              n_dose = 0)) %>% 
+                              second_dose = 0 
+                              #n_dose = 0
+                              )) %>% 
   arrange(Code, Age, Date) %>%
   group_by(Code, Age) %>% 
   mutate(Vaccination1 = cumsum(first_dose), 
-         Vaccination2 = cumsum(second_dose), 
-         Vaccinations = cumsum(n_dose)) %>% 
+         Vaccination2 = cumsum(second_dose) 
+         #Vaccinations = cumsum(n_dose)
+         ) %>% 
   ungroup() %>% 
   select(Date, Code, Age, 
-         Vaccination1, Vaccination2, Vaccinations) %>% 
+         Vaccination1, Vaccination2
+         #, Vaccinations
+         ) %>% 
   pivot_longer(-c(Date, Code, Age), names_to = "Measure", values_to = "Value") %>% 
   mutate(Age= case_when ( 
                   Age ==  "0-17"~"0",
