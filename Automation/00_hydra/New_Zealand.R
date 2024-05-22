@@ -22,7 +22,8 @@ ss_i     <- rubric_i %>% dplyr::pull(Sheet)
 ss_db    <- rubric_i %>% dplyr::pull(Source)
 
 # importing archived data 
-NewZealand_in <- read_rds(paste0(dir_n, ctr, ".rds"))
+NewZealand_in <- read_rds(paste0(dir_n, ctr, ".rds")) |> 
+  filter(Measure != "Cases")
 
 last_date_drive <- NewZealand_in %>% 
   mutate(date_f = dmy(Date)) %>% 

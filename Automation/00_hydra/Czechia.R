@@ -87,6 +87,7 @@ Dates_All <- seq(DateRange[1],DateRange[2],by="days")
 cz_cases_region_ss <- 
   cz_cases2 %>% 
   left_join(CZNUTS3, by = "code") %>% 
+  filter(Code != "UNK") |> 
   select(Code, Date, Sex, Age) %>% 
   mutate(Age = case_when(between(Age,1,4) ~ 1,
                          Age >= 100 ~ 100,
@@ -121,7 +122,7 @@ cz_cases_region_ss <-
          Date = ddmmyyyy(Date)) %>% 
   left_join(CZNUTS3, by = "Code") %>% 
   select(Country, 
-         Region = `Natural Region Names`,
+         Region = name,
          Code, 
          Date, 
          Sex, 
@@ -202,7 +203,7 @@ cz_deaths_region_ss <-
          Country = "Czechia") %>% 
   left_join(CZNUTS3, by = "Code") %>% 
   select(Country, 
-         Region = `Natural Region Names`, 
+         Region = name, 
          Code, 
          Date, 
          Sex, 
