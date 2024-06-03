@@ -48,7 +48,7 @@ input_enc_rd <-
   mutate(Value = round(Value, 1)) %>% 
   group_by(Country, Code, Region, Sex, Date, Age, AgeInt, Measure) %>%
   mutate(row_no = row_number()) %>%
-  pivot_wider(names_from = Measure, values_from = Value) %>% 
+  pivot_wider(names_from = "Measure", values_from = "Value") %>% 
   select(-row_no) |> 
   ungroup() |> 
  # select(-templateID) |> 
@@ -65,16 +65,24 @@ write_csv(out05_enc_rd, "N:/COVerAGE-DB/website_data/web_out05.csv",
           na = "")
 write_csv(out10_enc_rd, "N:/COVerAGE-DB/website_data/web_out10.csv", 
           na = "")
-write_csv(input_enc_rd, "N:/COVerAGE-DB/website_data/web_input.csv", 
+write_csv(input_enc_rd, "N:/COVerAGE-DB/website_data/web_input.csv",
           na = "")
 
+# write.csv(input_enc_rd, "N:/COVerAGE-DB/website_data/web_input.csv", 
+#           fileEncoding = "UTF-8")
+
+# ReadIn <- read.csv("N:/COVerAGE-DB/website_data/web_input.csv")
 
 # writing a csv example to verify in Notepad++
 test <-
-  out05_enc_rd %>%
-  filter(Code %in% c("DE-TH", "ES-C"))
+  input_enc_rd %>% 
+  #out05_enc_rd %>%
+  #, "ES-C"
+  filter(Code %in% c("DE-TH")) %>% 
+  select(Country, Region, Code, Vaccination1, Date)
 
-write.csv(test, "N:/COVerAGE-DB/website_data/web_test.csv", fileEncoding = "UTF-8")
+write.csv(test, "N:/COVerAGE-DB/website_data/web_test.csv", 
+          fileEncoding = "UTF-8")
 write_csv(test, "N:/COVerAGE-DB/website_data/web_test2.csv",
           na = "")
 # 

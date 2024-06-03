@@ -89,8 +89,7 @@ scripts <- c('Bulgaria', 'Belgium', 'CanadaPDFs',
              'Italy', 'Ireland', 
             'Malaysia', 
              'Netherlands', 'New_Zealand',  
-             'Scotland', 
-             'Lithuania_vaccine')
+             'Scotland')
 
 # scripts <- c('USA_cases_all', 'USA_cases_states', 'USA_deaths_all', 'USA_deaths_states')
 # scripts <- c('USA_cases_all', 'USA_deaths_all')

@@ -278,3 +278,79 @@
 # J (maybe_lower_closeout) 
  Fri Nov 24 07:28:00 2023 
 
+
+# begin resolution of multiple sources per population 
+ Thu May 23 12:02:49 2024 
+
+
+# prep (resolve_UNKUNK) 
+ Thu May 23 12:11:58 2024 
+
+
+# A (convert_fractions_sexes) 
+ Thu May 23 12:54:44 2024 
+
+
+# B (redistribute_unknown_age) 
+ Thu May 23 13:14:12 2024 
+
+
+# prep (resolve_UNKUNK) 
+ Thu May 23 15:01:22 2024 
+
+
+# A (convert_fractions_sexes) 
+ Thu May 23 16:08:25 2024 
+
+
+# B (redistribute_unknown_age) 
+ Thu May 23 16:28:12 2024 
+
+
+# C (rescale_to_total) 
+ Thu May 23 18:35:15 2024 
+
+
+# D (infer_cases_from_deaths_and_ascfr) 
+ Thu May 23 20:06:50 2024 
+
+
+# prep (resolve_UNKUNK) 
+ Thu May 23 22:13:51 2024 
+
+
+# A (convert_fractions_sexes) 
+ Thu May 23 23:39:24 2024 
+
+
+# B (redistribute_unknown_age) 
+ Fri May 24 00:19:41 2024 
+
+
+# C (rescale_to_total) 
+ Fri May 24 04:20:30 2024 
+
+
+# D (infer_cases_from_deaths_and_ascfr) 
+ Fri May 24 07:21:09 2024 
+
+
+# E (infer_deaths_from_cases_and_ascfr) 
+ Fri May 24 08:07:36 2024 
+
+
+# G (redistribute_unknown_sex) 
+ Fri May 24 13:11:28 2024 
+
+
+# H (rescale_sexes) 
+ Fri May 24 14:53:02 2024 
+
+
+# I (infer_both_sex) 
+ Fri May 24 15:12:59 2024 
+
+
+# J (maybe_lower_closeout) 
+ Fri May 24 16:34:04 2024 
+
