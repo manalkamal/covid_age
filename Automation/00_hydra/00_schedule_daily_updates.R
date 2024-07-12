@@ -81,13 +81,12 @@ tasks <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 scripts <- c('Bulgaria', 'Belgium', 'CanadaPDFs',
              'Czechia', 
-             'CA_Ontario',  
              'Estonia', 
              'Finland',  
              'Germany', 'Germany_vaccine', 'Guatemala',
              'Hong_Kong_Vaccine',
              'Italy', 'Ireland', 
-            'Malaysia', 
+             'Malaysia', 
              'Netherlands', 'New_Zealand',  
              'Scotland')
 
