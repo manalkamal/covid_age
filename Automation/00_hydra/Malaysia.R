@@ -30,12 +30,16 @@ state_dist <- read.csv("https://raw.githubusercontent.com/MoH-Malaysia/covid19-p
   dplyr::distinct(state, idxs)
 
 # CASES & DEATHS ===============
+##' MK, 17.07.2024: links FOR CASES AND DEATHS ARE NOT WORKING ANYMORE. 
+##' So, we change the cases from linelist 1-year age to 5-year age interval data.
+##' Keep deaths from original file 
 
 ## SOURCE: https://github.com/MoH-Malaysia/covid19-public/tree/main/epidemic/linelist
 
 # CASES: LINELIST # ================
 
-cases_url <- "https://moh-malaysia-covid19.s3.ap-southeast-1.amazonaws.com/linelist_cases.parquet"
+#cases_url <- "https://moh-malaysia-covid19.s3.ap-southeast-1.amazonaws.com/linelist_cases.parquet"
+cases_url <- "https://raw.githubusercontent.com/MoH-Malaysia/covid19-public/main/epidemic/cases_state.csv"
 cases_source <- paste0(dir_n, "Data_sources/", ctr, "/", ctr, "-cases_linelist_",today(), ".parquet")
 
  
@@ -45,112 +49,64 @@ download.file(cases_url,
               destfile = cases_source,
               mode = "wb")
 
-cases_linelist <- arrow::read_parquet(cases_source) 
+#cases_linelist <- arrow::read_parquet(cases_source) 
 
-## PLAN B: to download & read in the parquet file
-#download.file(cases_url, destfile = "Data/malaysia_cases.parquet",method="libcurl")`
-# arrow::read_parquet() worked after reinstalled like so in a fresh session: 
-# Sys.setenv(ARROW_WITH_BROTLI = "ON")
-# install.packages("arrow")
-# cases_linelist <- arrow::read_parquet(cases_url) 
+cases_linelist <- read.csv(cases_source)
+
 
 ## WRNAGLING, ETC ##
 
 ## Purpose is to convert the linelist dataset into cumulative time series dataset, so:
-## 1- we need to fill the gaps in between the dates 
-## 2- we need to cumsum value. 
-
-dates_f <- seq(min(cases_linelist$date), 
-               max(cases_linelist$date), by = "day")
-
 
 cases_linelist2 <- cases_linelist %>% 
-  dplyr::mutate(age = as.integer(age),
-                male = as.character(male)) %>% 
-  dplyr::mutate(Date = ymd(date),
-                Age = case_when(age < 0 ~ "UNK",
-                                age > 105 ~ "105",
-                                TRUE ~ as.character(age)),
-                Sex = case_when(male == "1" ~ "m", 
-                                TRUE ~ "f")) %>% 
-  dplyr::select(Date, Age, 
-                Sex, state) %>% 
-## Since the deaths data are only by State, and for the sake of consistency, 
-## Cases are also will be by State, though District & other epi-data are available.
-  dplyr::group_by(Date, Age, Sex, state) %>% 
-  dplyr::count(name = "Value") %>% 
-  dplyr::ungroup()  %>% 
-  tidyr::complete(Sex, Age, state, Date=dates_f, fill=list(Value=0)) %>% 
-  dplyr::group_by(state, Age, Sex) %>% 
-  dplyr::mutate(Value = cumsum(Value)) %>% 
+  dplyr::select(date, state, cases_0_4, cases_5_11,
+                cases_12_17, cases_18_29, cases_30_39, cases_40_49,
+                cases_50_59, cases_60_69, cases_70_79, cases_80) |> 
+  tidyr::pivot_longer(cols = -c("date", "state"),
+                      names_to = "Cases_age",
+                      values_to = "Value") |> 
+  tidyr::separate(col = Cases_age, into = c("cases", "age", "age1"), sep = "_") |> 
+  dplyr::select(-c("cases", "age1")) |> 
+  dplyr::mutate(Age = age,
+                Date = ymd(date)) %>% 
+  dplyr::select(Date, Age, state, Value) %>% 
+  dplyr::group_by(state, Age) %>% 
+  dplyr::arrange(Date) |> 
+  dplyr::mutate(Value = cumsum(Value),
+                AgeInt = case_when(Age == 0 ~ 5,
+                                   Age == 5 ~ 7,
+                                   Age == 12 ~ 6,
+                                   Age == 18 ~ 12,
+                                   Age == 80 ~ 25,
+                                   TRUE ~ 10),
+                Sex = "b") %>% 
   dplyr::ungroup()
   
   
 cases <- cases_linelist2 %>% 
-    dplyr::left_join(state_dist, by = c("state" = "idxs")) %>% 
-    dplyr::mutate(Country = "Malaysia",
-                  AgeInt = case_when(Age == "UNK" ~ NA_integer_,
-                                     TRUE ~ 1L),
-                  Code = paste0("MY-", 
-                                str_pad(state, width=2, side="left", pad="0")),
-                  Metric = "Count",
-                  Measure = "Cases") %>% 
-    dplyr::select(Country, Region = state.y, Code, 
-                  Date, Sex, Age, AgeInt, 
-                  Metric, Measure, Value)
-  
-  
-  
-  
-# DEATHS: LINELIST # ================
-
-deaths_url <- "https://moh-malaysia-covid19.s3.ap-southeast-1.amazonaws.com/linelist_deaths.parquet"
-deaths_source <- paste0(dir_n, "Data_sources/", ctr, "/", ctr, "-deaths_linelist_",today(), ".parquet")
-
-
-## DOWNLOAD CASES AND READ IN THE DATA ##
-
-download.file(deaths_url,
-              destfile = deaths_source,
-              mode = "wb")
-
-deaths_linelist <- arrow::read_parquet(deaths_source)  
-
-## WRNAGLING, ETC ##
-
-deaths_linelist2 <- deaths_linelist %>% 
-  dplyr::mutate(age = as.integer(age),
-                male = as.character(male)) %>% 
-  dplyr::mutate(Date = ymd(date),
-                Age = case_when(age < 0 ~ "UNK",
-                                age > 105 ~ "105",
-                                TRUE ~ as.character(age)),
-                Sex = case_when(male == "1" ~ "m", 
-                                TRUE ~ "f")) %>%  
-  dplyr::group_by(Date, Age, Sex, Region = state) %>%
-  dplyr::count(name = "Value") %>% 
-  dplyr::ungroup() %>% 
-  tidyr::complete(Sex, Age, Region, Date=dates_f, fill=list(Value=0)) %>% 
-  dplyr::group_by(Age, Sex, Region) %>% 
-  dplyr::mutate(Value = cumsum(Value)) %>% 
-  dplyr::ungroup()
-
-
-deaths <- deaths_linelist2 %>% 
-  dplyr::left_join(state_dist, by = c("Region" = "state")) %>% 
+  dplyr::left_join(state_dist, by = c("state")) %>% 
   dplyr::mutate(Country = "Malaysia",
-                AgeInt = case_when(Age == "UNK" ~ NA_integer_,
-                                   TRUE ~ 1L),
                 Code = paste0("MY-", 
                               str_pad(idxs, width=2, side="left", pad="0")),
                 Metric = "Count",
-                Measure = "Deaths")  %>% 
-  dplyr::select(Country, Region, Code, 
+                Measure = "Cases") %>% 
+  dplyr::select(Country, Region = state, Code, 
                 Date, Sex, Age, AgeInt, 
-                Metric, Measure, Value)
+                Metric, Measure, Value) |> 
+  dplyr::mutate(Date = ddmmyyyy(Date)) |> 
+  sort_input_data()
+  
+  
+  
+  
+# DEATHS ===================
+
+## The deprecated file has the data in 1-year age for cases, deaths and data on vaccination. 
+MalaysiaDeaths <- readRDS("N:/COVerAGE-DB/Automation/Hydra/deprecated/Malaysia.rds") |> 
+  filter(Measure == "Deaths")
 
 
-epiData_malaysia <- dplyr::bind_rows(cases, deaths) 
+epiData_malaysia <- dplyr::bind_rows(cases, MalaysiaDeaths) 
 
 
 # Vaccination =======================================
@@ -163,41 +119,6 @@ epiData_malaysia <- dplyr::bind_rows(cases, deaths)
 
 Vacc_age <- read.csv("https://github.com/MoH-Malaysia/covid19-public/raw/main/vaccination/vax_demog_age.csv") %>% 
   dplyr::select(-district)
-
-# Vacc_sex <- read.csv("https://github.com/MoH-Malaysia/covid19-public/raw/main/vaccination/vax_demog_sex.csv") %>% 
-#   dplyr::select(-district)
-# 
-# 
-# Sex_vacc <- Vacc_sex %>% 
-#   tidyr::pivot_longer(cols = -c("date", "state"),
-#                       names_to = c("Measure", "Sex"),
-#                       names_sep = "_",
-#                       values_to = "Value") %>% 
-#   dplyr::mutate(date = ymd(date),
-#                 Measure = case_when(Measure == "partial" ~ "Vaccination1",
-#                                     Measure == "full" ~ "Vaccination2",
-#                                     Measure == "booster" ~ "Vaccination3",
-#                                     TRUE ~ Measure),
-#                 Sex = case_when(Sex == "female" ~ "f",
-#                                 Sex == "male" ~ "m",
-#                                 Sex == "missing" ~ "UNK",
-#                                 TRUE ~ Sex)) %>% 
-#   dplyr::select(Date = date, Region = state,
-#                   Sex, Measure, Value) %>% 
-#   dplyr::group_by(Date, Region, Sex, Measure) %>% 
-#   dplyr::summarise(Value = sum(Value)) %>% 
-#   dplyr::left_join(state_dist, by = c("Region" = "state")) %>% 
-#   dplyr::mutate(Country = "Malaysia",
-#                 Code = paste0("MY-", 
-#                              str_pad(idxs, width=2, side="left", pad="0")),
-#                Metric = "Count",
-#                Age = NA_character_,
-#                AgeInt = NA_integer_)  %>% 
-#    dplyr::select(Country, Region, Code, 
-#                 Date, Sex, Age, AgeInt,
-#                 Metric, Measure, Value)
-
-
 
 Age_Vacc <- Vacc_age %>% 
   ## These data were by district, we have to sum value then at the level of States,
@@ -250,18 +171,14 @@ Age_Vacc <- Vacc_age %>%
                 Sex = "b")  %>% 
   dplyr::select(Country, Region, Code, 
                 Date, Age, AgeInt, 
-                Sex, Metric, Measure, Value)
-
-# ## binding all vaccination data into one dataframe
-# vacc_all <- Age_Vacc %>% 
-#   dplyr::bind_rows(Sex_vacc)
+                Sex, Metric, Measure, Value) %>% 
+  dplyr::mutate(Date = ddmmyyyy(Date)) %>% 
+  sort_input_data()
 
 ## binding epi-data & vaccination data into one df
 
 out <- epiData_malaysia %>% 
-  dplyr::bind_rows(Age_Vacc) %>% 
-  dplyr::mutate(Date = ddmmyyyy(Date)) %>% 
-  sort_input_data()
+  dplyr::bind_rows(Age_Vacc) 
 
 
 ############################
@@ -276,4 +193,48 @@ log_update(pp = ctr, N = nrow(out))
 
 #END
 
-                   
+# LINELIST # ================
+
+#deaths_url <- "https://moh-malaysia-covid19.s3.ap-southeast-1.amazonaws.com/linelist_deaths.parquet"
+
+# deaths_source <- paste0(dir_n, "Data_sources/", ctr, "/", ctr, "-deaths_linelist_",today(), ".parquet")
+# DOWNLOAD CASES AND READ IN THE DATA ##
+# 
+# download.file(deaths_url,
+#               destfile = deaths_source,
+#               mode = "wb")
+# 
+# deaths_linelist <- arrow::read_parquet(deaths_source)  
+# 
+# ## WRNAGLING, ETC ##
+# 
+# deaths_linelist2 <- deaths_linelist %>% 
+#   dplyr::mutate(age = as.integer(age),
+#                 male = as.character(male)) %>% 
+#   dplyr::mutate(Date = ymd(date),
+#                 Age = case_when(age < 0 ~ "UNK",
+#                                 age > 105 ~ "105",
+#                                 TRUE ~ as.character(age)),
+#                 Sex = case_when(male == "1" ~ "m", 
+#                                 TRUE ~ "f")) %>%  
+#   dplyr::group_by(Date, Age, Sex, Region = state) %>%
+#   dplyr::count(name = "Value") %>% 
+#   dplyr::ungroup() %>% 
+#   tidyr::complete(Sex, Age, Region, Date=dates_f, fill=list(Value=0)) %>% 
+#   dplyr::group_by(Age, Sex, Region) %>% 
+#   dplyr::mutate(Value = cumsum(Value)) %>% 
+#   dplyr::ungroup()
+# 
+# 
+# deaths <- deaths_linelist2 %>% 
+#   dplyr::left_join(state_dist, by = c("Region" = "state")) %>% 
+#   dplyr::mutate(Country = "Malaysia",
+#                 AgeInt = case_when(Age == "UNK" ~ NA_integer_,
+#                                    TRUE ~ 1L),
+#                 Code = paste0("MY-", 
+#                               str_pad(idxs, width=2, side="left", pad="0")),
+#                 Metric = "Count",
+#                 Measure = "Deaths")  %>% 
+#   dplyr::select(Country, Region, Code, 
+#                 Date, Sex, Age, AgeInt, 
+#                 Metric, Measure, Value)
