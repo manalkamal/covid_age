@@ -19,6 +19,7 @@ drive_auth(email = Sys.getenv("email"))
 gs4_auth(email = Sys.getenv("email"))
 
 #Read in data archive
+## MK 07.08.2024: No update since 01.07.2024, so deprecated. 
 
 BGArchive <- read_rds(paste0(dir_n, ctr, ".rds"))
 
@@ -263,7 +264,7 @@ BG_out <-
 write_rds(BG_out, paste0(dir_n, ctr, ".rds"))
 
 
-log_update("Bulgaria", N = nrow(BG_out))
+#log_update("Bulgaria", N = nrow(BG_out))
 
 # clean up locally downloaded files
 file.remove(data_source)

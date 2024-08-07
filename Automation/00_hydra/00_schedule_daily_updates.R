@@ -79,13 +79,12 @@ tasks <-
 
 # list of all available scripts to schedule
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-scripts <- c('Bulgaria', 'Belgium', 'CanadaPDFs',
+scripts <- c('Belgium', 'CanadaPDFs',
              'Czechia', 
              'Estonia', 
              'Finland',  
              'Germany', 'Germany_vaccine', 'Guatemala',
              'Hong_Kong_Vaccine',
-             'Italy', 'Ireland', 
              'Malaysia', 
              'Netherlands', 'New_Zealand',  
              'Scotland')

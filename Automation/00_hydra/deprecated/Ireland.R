@@ -9,6 +9,7 @@ library(tidyverse)
 library(janitor)
 library(rjson)
 
+## MK 07.08.2024: No update since April and deaths are not updated anymore, deprecated. 
 
 email <- Sys.getenv("email")
 
@@ -245,7 +246,7 @@ out <- bind_rows(Everything, deaths_rds) |>
 
 saveRDS(out, file = "N://COVerAGE-DB/Automation/Hydra/Ireland.rds")
 
-log_update(pp = ctr, N = nrow(out)) 
+#log_update(pp = ctr, N = nrow(out)) 
 
 
 

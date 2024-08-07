@@ -7,6 +7,7 @@ if (!"email" %in% ls()){
 }
 
 # info country and N drive address
+# MK: 07.08.2024: Only totals are updated, so deprecated. 
 ctr <- "Italy"
 dir_n <- "N:/COVerAGE-DB/Automation/Hydra/"
 
@@ -219,7 +220,7 @@ out <- bind_rows(out, totals) %>%
 #nrow(out_drive)
 #nrow(vacc3)
 write_rds(out, paste0(dir_n, ctr, ".rds"))
-log_update(pp = ctr, N = nrow(out))
+#log_update(pp = ctr, N = nrow(out))
 
 # Italy adjustment of Bolletino and Infographic sources in one sheet ==============
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
