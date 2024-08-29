@@ -32,8 +32,10 @@ last_date_drive <- NewZealand_in %>%
 
 # reading data from the website 
 ### source
-m_url <- "https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics"
+#m_url <- "https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics"
 
+## link change in 26.08.2024
+m_url <- "https://www.tewhatuora.govt.nz/for-health-professionals/data-and-statistics/covid-19-data/covid-19-case-demographics/"
 # reading date of last update
 html      <- read_html(m_url)
 date_text <-
