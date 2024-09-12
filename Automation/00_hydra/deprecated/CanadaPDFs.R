@@ -105,7 +105,7 @@ for(i in seq_along(filesdownload$pdf_url)){
     log_update(pp = ctr, N = "NoPDF")
     next
   } else {
-    log_update(pp = ctr, N = "Downloaded")
+   # log_update(pp = ctr, N = "Downloaded")
   }
 }
 

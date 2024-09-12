@@ -214,7 +214,7 @@ Vaccine_out <- rbind(Vaccine_out_all,Vaccine_out_reg) %>%
 write_rds(Vaccine_out, paste0(dir_n, ctr, ".rds"))
 
 # updating hydra dashboard
-log_update(pp = ctr, N = nrow(Vaccine_out))
+#log_update(pp = ctr, N = nrow(Vaccine_out))
 
 #zip input data
 zipname <- paste0(dir_n,
