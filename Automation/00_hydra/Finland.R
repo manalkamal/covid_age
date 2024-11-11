@@ -286,7 +286,7 @@ write_rds(FI_out, paste0(dir_n, ctr, ".rds"))
 #            ss = ss_i,
 #            sheet = "database")
 
-log_update("Finland", N = nrow(FI_out))
+#log_update("Finland", N = nrow(FI_out))
 
 ############################################
 #### uploading metadata to N Drive ####

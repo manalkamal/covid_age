@@ -163,7 +163,7 @@ db_all <-
 
 # database
 write_rds(db_all, paste0(dir_n, ctr, ".rds"))
-log_update(pp = "Estonia", N = nrow(db_all))
+#log_update(pp = "Estonia", N = nrow(db_all))
 
 # datasource
 data_source <- paste0(dir_n, "Data_sources/", ctr, "/cases&tests_",today(), ".csv")

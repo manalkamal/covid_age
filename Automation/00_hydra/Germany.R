@@ -208,7 +208,7 @@ All_Out |>
 ############################################
 write_rds(All_Out, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = ctr, N = nrow(All_Out))
+#log_update(pp = ctr, N = nrow(All_Out))
 
 ############################################
 #### uploading metadata to Google Drive ####

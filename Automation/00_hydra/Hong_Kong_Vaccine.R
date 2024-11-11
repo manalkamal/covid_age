@@ -41,7 +41,10 @@ processed_series <- vaccination_series |>
                              str_detect(Measure_tocode, "4th") ~ "Vaccination4",
                              str_detect(Measure_tocode, "5th") ~ "Vaccination5",
                              str_detect(Measure_tocode, "6th") ~ "Vaccination6",
-                             str_detect(Measure_tocode, "7th") ~ "Vaccination7")) |> 
+                             str_detect(Measure_tocode, "7th") ~ "Vaccination7",
+                             str_detect(Measure_tocode, "8th") ~ "Vaccination8",
+                             str_detect(Measure_tocode, "9th") ~ "Vaccination9",
+                             str_detect(Measure_tocode, "10th") ~ "Vaccination10")) |> 
   group_by(Date, Age, Sex, Measure) |> 
   summarise(Value = sum(Value), .groups = "drop") |> 
   group_by(Age, Sex, Measure) |>
@@ -70,7 +73,7 @@ out <- processed_series |>
 #save output 
 #updating hydra dashboard
 write_rds(out, paste0(dir_n, ctr, ".rds"))
-log_update(pp = ctr, N = nrow(out))
+#log_update(pp = ctr, N = nrow(out))
 
 #zip input data
 

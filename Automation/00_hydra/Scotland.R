@@ -351,7 +351,7 @@ SCout <- bind_rows(sc,
 
 write_rds(SCout, paste0(dir_n, ctr, ".rds"))
 
-log_update(pp = "Scotland", N = nrow(SCout))
+#log_update(pp = "Scotland", N = nrow(SCout))
 
 
 

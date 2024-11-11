@@ -283,7 +283,7 @@ all_the_tables <- html_deaths %>%
   file.remove(data_source)
   
 } else if (date_f == last_date_drive) {
-  log_update(pp = ctr, N = 0)
+  #log_update(pp = ctr, N = 0)
 }
 
 
